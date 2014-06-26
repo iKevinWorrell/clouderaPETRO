@@ -4,8 +4,8 @@ import sys
 import re
 import uuid
 
-if len(sys.argv) < 2:
-    sys.stderr.write('Usage: python las_flatten.py myLASfile myLASoutput')
+if len(sys.argv) < 3:
+    sys.stderr.write('Usage: python las_flatten.py myLASfile myLASoutput delimiter')
     sys.exit(1)
 
 print('#' * 14 + ' Your Command Arguments ' + '#' * 14)
@@ -14,6 +14,7 @@ print('#' * 52)
 
 print ('Start Time - ' + time.strftime("%d/%m/%Y %H:%M:%S"))
 
+delim = str(sys.argv[3])
 curr_block = None
 metainfo = []
 curveinfo = []
@@ -75,11 +76,11 @@ with open(str(sys.argv[2]), 'w+') as fLASflat:
     rowheader = 'unique_id'
     for i, e in enumerate(metainfo):
         #    print ('|' + '%03d) %s' % (i, ', '.join(e)))
-        rowheader = rowheader + '~' + str(e[2].replace(' ', '_')).strip()
+        rowheader = rowheader + delim + str(e[2].replace(' ', '_')).strip()
 
     for i, e in enumerate(curveinfo):
         #    print ('|' + '%03d) %s' % (i, ', '.join(e)))
-        rowheader = rowheader + '~' + str(e[1].replace(' ', '_')).strip()
+        rowheader = rowheader + delim + str(e[1].replace(' ', '_')).strip()
     fLASflat.write(rowheader + '\n')
 
     uniqueid = uuid.uuid4()
@@ -92,9 +93,9 @@ with open(str(sys.argv[2]), 'w+') as fLASflat:
         rowmeta = ''
         for b, be in enumerate(metainfo):
         #    print ('|' + '%03d) %s' % (i, ', '.join(e)))
-            rowmeta = rowmeta + '~' + str(be[1]).strip()
+            rowmeta = rowmeta + delim + str(be[1]).strip()
 
-        fLASflat.write((str(a) + '-' + str(uniqueid) + rowmeta + '~' + ae[0] + '~' + ae[1] + '~' + ae[2] + '~' + ae[3] + '~' + ae[4] + '~' + ae[5] + '~' + ae[6] + '~' + ae[7] + '~' + ae[8] + '~' + ae[9] + '\n'))
+        fLASflat.write((str(a) + '-' + str(uniqueid) + rowmeta + delim + ae[0] + delim + ae[1] + delim + ae[2] + delim + ae[3] + delim + ae[4] + delim + ae[5] + delim + ae[6] + delim + ae[7] + delim + ae[8] + delim + ae[9] + '\n'))
 
 fLASflat.close()
 
