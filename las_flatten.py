@@ -1,4 +1,10 @@
-__author__ = 'kw@cloudera.com'
+# Used to flatten LAS (Log ASCII Standard) files into a tabular table
+# TODO (kw@cloudera.com): add versions beyond 2.0
+# TODO (kw@cloudera.com): add functions / classes / .... OO the thing
+# TODO (kw@cloudera.com): fix data values for non ~A sections i.e. UWI needs to be just UWI value
+
+__author__ = 'Kevin Worrell - kw@cloudera.com'
+
 import time
 import sys
 import re
@@ -72,7 +78,6 @@ with open(str(sys.argv[1]), 'r') as fLAS:
 fLAS.close()
 
 with open(str(sys.argv[2]), 'w+') as fLASflat:
-
     rowheader = 'unique_id'
     for i, e in enumerate(metainfo):
         #    print ('|' + '%03d) %s' % (i, ', '.join(e)))
@@ -86,16 +91,26 @@ with open(str(sys.argv[2]), 'w+') as fLASflat:
     uniqueid = uuid.uuid4()
     rowdata = ''
 
-
     for a, ae in enumerate(asciiinfo):
         rowdata = rowdata + str(a + 1) + '-' + str(uniqueid)
 
         rowmeta = ''
         for b, be in enumerate(metainfo):
-        #    print ('|' + '%03d) %s' % (i, ', '.join(e)))
+            #    print ('|' + '%03d) %s' % (i, ', '.join(e)))
             rowmeta = rowmeta + delim + str(be[1]).strip()
 
-        fLASflat.write((str(a) + '-' + str(uniqueid) + rowmeta + delim + ae[0] + delim + ae[1] + delim + ae[2] + delim + ae[3] + delim + ae[4] + delim + ae[5] + delim + ae[6] + delim + ae[7] + delim + ae[8] + delim + ae[9] + '\n'))
+        fLASflat.write((str(a) + '-' + str(uniqueid) + rowmeta +
+                        delim + ae[0] +
+                        delim + ae[1] +
+                        delim + ae[2] +
+                        delim + ae[3] +
+                        delim + ae[4] +
+                        delim + ae[5] +
+                        delim + ae[6] +
+                        delim + ae[7] +
+                        delim + ae[8] +
+                        delim + ae[9] +
+                        '\n'))
 
 fLASflat.close()
 
