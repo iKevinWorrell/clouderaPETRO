@@ -5,7 +5,7 @@ import re
 import uuid
 
 if len(sys.argv) < 2:
-    sys.stderr.write('Usage: python las_flatten.py myLASfile')
+    sys.stderr.write('Usage: python las_flatten.py myLASfile myLASoutput')
     sys.exit(1)
 
 print('#' * 14 + ' Your Command Arguments ' + '#' * 14)
