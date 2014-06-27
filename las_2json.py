@@ -76,11 +76,9 @@ fLAS.close()
 rowheader = 'unique_id'
 
 for i, e in enumerate(metainfo):
-    #    print ('|' + '%03d) %s' % (i, ', '.join(e)))
     rowheader = rowheader + delim + str(e[2].replace(' ', '_')).strip()
 
 for i, e in enumerate(curveinfo):
-    #    print ('|' + '%03d) %s' % (i, ', '.join(e)))
     rowheader = rowheader + delim + str(e[1].replace(' ', '_')).strip()
 
 rowlabels = rowheader.split(delim)
@@ -92,9 +90,6 @@ for a, ae in enumerate(asciiinfo):
     rowmeta = (metavalues + (ae))
     rowmeta.insert(0,(str(a + 1) + '-' + str(uniqueid)))
     print(json.dumps(dict((zip(rowlabels, rowmeta)))))
-
-    if a > 10:
-        break
 
 
 
