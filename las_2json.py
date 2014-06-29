@@ -1,17 +1,25 @@
 # Used to convert LAS (Log ASCII Standard) files into json
 # TODO (kw@cloudera.com): add versions beyond 2.0
 
-__author__ = 'Kevin Worrell - kw@cloudera.com'
+__author__ = 'Kevin Worrell'
+__copyright__ = "Copyright (c) 2014, Kevin Worrell <kw@cloudera.com>, All rights reserved"
+__license__ = "Apache License"
+__version__ = "2.0"
 
 import sys
 import re
 import uuid
 import json
 
-if len(sys.argv) < 2:
-    sys.stderr.write('Usage: python las_flatten.py myLASfile delimiter')
+if len(sys.argv) < 3:
+    sys.stderr.write('Usage: python las_2json.py myLASfile delimiter output')
     sys.exit(1)
 
+if (sys.argv[3].lower() in ('json', 'file')):
+    #print('Writting output to: ' + sys.argv[3])
+    None
+else:
+    raise Exception('sript requires an output type of json or file')
 
 delim = str(sys.argv[2])
 curr_block = None
@@ -21,6 +29,7 @@ otherinfo = []
 asciiinfo = []
 metavalues = []
 
+# Process the LAS file passed in as a cmd arg
 with open(str(sys.argv[1]), 'r') as fLAS:
     for line in fLAS:
         if line.startswith('~'):
@@ -73,7 +82,7 @@ with open(str(sys.argv[1]), 'r') as fLAS:
             raise Exception("Unknown section '%s'" % line)
 fLAS.close()
 
-rowheader = 'unique_id'
+rowheader = 'unique_id' + delim + 'original_document_url'
 
 for i, e in enumerate(metainfo):
     rowheader = rowheader + delim + str(e[2].replace(' ', '_')).strip()
@@ -86,12 +95,7 @@ rowlabels = rowheader.split(delim)
 uniqueid = uuid.uuid4()
 
 for a, ae in enumerate(asciiinfo):
-    rowmeta = ''
     rowmeta = (metavalues + (ae))
-    rowmeta.insert(0,(str(a + 1) + '-' + str(uniqueid)))
+    rowmeta.insert(0, 'hdfs://jerryjones.localdomain/user/kw/bh/' + str(fLAS.name))
+    rowmeta.insert(0, (str(a + 1) + '-' + str(uniqueid)))
     print(json.dumps(dict((zip(rowlabels, rowmeta)))))
-
-
-
-
-
