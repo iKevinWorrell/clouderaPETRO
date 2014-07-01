@@ -1,3 +1,1 @@
-Usage: python las_2json.py myLASfile delimiter output [#doc2test]
-
-
+Usage: python las_2json.py myLASfile myConfigFile

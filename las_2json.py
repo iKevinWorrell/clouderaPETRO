@@ -10,18 +10,26 @@ import sys
 import re
 import uuid
 import json
+import ConfigParser
 
-if len(sys.argv) < 3:
-    sys.stderr.write('Usage: python las_2json.py myLASfile delimiter output [#doc2test]')
+if len(sys.argv) < 2:
+    sys.stderr.write('Usage: python las_2json.py myLASfile myConfigFile')
     sys.exit(1)
 
-if (sys.argv[3].lower() in ('json', 'file')):
-    #print('Writting output to: ' + sys.argv[3])
-    None
-else:
-    raise Exception('sript requires an output type of json or file')
+configs = ConfigParser.ConfigParser()
+configs.read(str(sys.argv[2]))
+debug = False
 
-delim = str(sys.argv[2])
+if configs.has_option('io','debug') and bool(configs.get('io', 'debug')) is False:
+    debug = configs.get('io', 'debug')
+    for section_name in configs.sections():
+        print 'Section:', section_name
+        print '  Options:', configs.options(section_name)
+        for name, value in configs.items(section_name):
+            print '  %s = %s' % (name, value)
+        print
+
+delim = configs.get('io', 'delimiter')
 curr_block = None
 metainfo = []
 curveinfo = []
@@ -52,28 +60,27 @@ with open(str(sys.argv[1]), 'r') as fLAS:
         elif curr_block == '~VERSION' and line.startswith('#') is False:
             myline = line.rsplit(':')
             #print('Processing -----> VERSION')
-            metainfo.append((curr_block, myline[0].strip(), (myline[1].strip()) + '_~VERSION'))
+            metainfo.append((curr_block, myline[0].strip(), (myline[1].strip()) + '_dyn_VERSION'))
             metavalues.append((myline[0].strip()))
 
         elif curr_block == '~WELL' and line.startswith('#') is False:
             myline = line.rsplit(':')
             #print('Processing -----> WELL')
-            if myline[1].strip().lower().replace(' ', '_') in (
-                    'unique_well_id', 'well_name', 'company_name', 'service_company_name', 'location', 'field_name'):
+            if myline[1].strip().lower().replace(' ', '_') in (str(configs.get('solr','staticfields'))):
                 metainfo.append((curr_block, myline[0].strip(), myline[1].strip()))
             else:
-                metainfo.append((curr_block, myline[0].strip(), (myline[1].strip()) + '_~WELL'))
+                metainfo.append((curr_block, myline[0].strip(), (myline[1].strip()) + '_dyn_WELL'))
             metavalues.append((myline[0].strip()))
 
         elif curr_block == '~OTHER' and line.startswith('#') is False:
             myline = line.rsplit(':')
             #print('Processing -----> OTHER')
-            otherinfo.append((curr_block, (myline[0].strip()) + '_~OTHER'))
+            otherinfo.append((curr_block, (myline[0].strip()) + '__dyn_OTHER'))
 
         elif curr_block == '~CURVE' and line.startswith('#') is False:
             myline = line.rsplit(':')
             #print('Processing -----> CURVE')
-            curveinfo.append((myline[0].strip(), (myline[1].strip()) + '_~CURVE'))
+            curveinfo.append((myline[0].strip(), (myline[1].strip()) + '__dyn_CURVE'))
 
         elif curr_block == '~ASCIILOG' and line.startswith('#') is False:
             myline = re.split(r'[ \t]+', line.strip())
@@ -84,6 +91,7 @@ with open(str(sys.argv[1]), 'r') as fLAS:
 
         else:
             raise Exception("Unknown section '%s'" % line)
+
 fLAS.close()
 
 rowheader = 'unique_id' + delim + 'original_document_url'
@@ -100,11 +108,11 @@ uniqueid = uuid.uuid4()
 
 for a, ae in enumerate(asciiinfo):
     rowmeta = (metavalues + (ae))
-    rowmeta.insert(0, 'hdfs://jerryjones.localdomain/user/kw/bh/' + str(fLAS.name))
+    rowmeta.insert(0, str(configs.get('solr', 'basedir')) + str(fLAS.name))
     rowmeta.insert(0, (str(a + 1) + '-' + str(uniqueid)))
     print('[' + (json.dumps(dict((zip(rowlabels, rowmeta))))) + ']')
 
-    if sys.argv.__len__() == 5 and int(sys.argv[4]) == a:
+    if a == 10 and bool(debug) is True:
         break
     else:
         None
