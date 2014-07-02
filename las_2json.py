@@ -3,7 +3,7 @@
 
 __author__ = 'Kevin Worrell'
 __copyright__ = "Copyright (c) 2014, Kevin Worrell <kw@cloudera.com>, All rights reserved"
-__license__ = "Apache License"
+__license__ = "Apache License http://www.apache.org/licenses/LICENSE-2.0.txt"
 __version__ = "2.0"
 
 import sys
