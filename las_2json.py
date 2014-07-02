@@ -20,7 +20,7 @@ configs = ConfigParser.ConfigParser()
 configs.read(str(sys.argv[2]))
 debug = False
 
-if configs.has_option('io','debug') and bool(configs.get('io', 'debug')) is False:
+if configs.has_option('io','debug') and configs.get('io', 'debug').lower().strip() == 'true':
     debug = configs.get('io', 'debug')
     for section_name in configs.sections():
         print 'Section:', section_name
@@ -65,12 +65,19 @@ with open(str(sys.argv[1]), 'r') as fLAS:
 
         elif curr_block == '~WELL' and line.startswith('#') is False:
             myline = line.rsplit(':')
-            #print('Processing -----> WELL')
+
             if myline[1].strip().lower().replace(' ', '_') in (str(configs.get('solr','staticfields'))):
-                metainfo.append((curr_block, myline[0].strip(), myline[1].strip()))
+                metainfo.append((curr_block, myline[0].strip(), myline[1].strip().lower()))
             else:
-                metainfo.append((curr_block, myline[0].strip(), (myline[1].strip()) + '_dyn_WELL'))
-            metavalues.append((myline[0].strip()))
+                metainfo.append((curr_block, myline[0].strip(), (myline[1].strip().lower()) + '_dyn_WELL'))
+
+            metafield = myline[0].strip()
+
+            for i in (configs.get('las','stripfields').split(':')):
+                if metafield.startswith(str(i)):
+                    metafield = metafield[(int(i.__len__())):].strip()
+
+            metavalues.append((metafield))
 
         elif curr_block == '~OTHER' and line.startswith('#') is False:
             myline = line.rsplit(':')
